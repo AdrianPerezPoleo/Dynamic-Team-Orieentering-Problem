@@ -1,0 +1,30 @@
+# Build 
+build/
+build*/
+cmake-build-*/
+bin/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Make 
+Makefile
+*.o
+*.obj
+*.out
+*.dzn
+*/*.dzn
+
+# Intermediate files
+*.s
+
+# IDEs & editors
+.vscode/
+*.swp
+*.tmp
+
+
+# Logs
+*.log

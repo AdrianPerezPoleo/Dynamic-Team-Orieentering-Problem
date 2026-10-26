@@ -16,6 +16,17 @@ class DTOPSolution {
  public:
 
  private:
+  std::vector<int> next_node_;
+  std::vector<int> prev_node_;
+
+  double total_profit_;
+  std::vector<double> route_profit;
+
+  std::vector<double> route_duration_;
+
+  std::vector<bool> visited_;
+
+  std::vector<std::vector<double>> arrival_times;
 };
 
 #endif

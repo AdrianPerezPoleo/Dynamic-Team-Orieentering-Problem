@@ -10,10 +10,28 @@
  */
 
 #include "../include/dtop_parser.h"
+#include "../include/dtop_algorithm.h"
+#include "../include/dtop_solution.h"
+
+#include <chrono>
 
 int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cerr << "Uso: " << argv[0] << " <archivo_instancia>" << std::endl;
+    return 1;
+  }
+
   std::string file_name = argv[1];
   DTOPInstance instance = DTOPParser::Parse(file_name);
+  DTOPAlgorithm* algorithm;
 
+  auto start = std::chrono::high_resolution_clock::now();
+  DTOPSolution solution = algorithm->Solve(instance);
+  auto end = std::chrono::high_resolution_clock::now();
+
+  std::chrono::duration<double, std::milli> duration = end - start;
   std::cout << instance << std::endl;
+  std::cout << "Tiempo de ejecucion: " << duration.count() << " ms" << std::endl;
+
+  return 0;
 }

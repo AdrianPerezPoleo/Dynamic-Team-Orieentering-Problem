@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
   std::string file_name = argv[1];
   DTOPInstance instance = DTOPParser::Parse(file_name);
-  DTOPAlgorithm* algorithm;
+  DTOPAlgorithm* algorithm = new SolomonRegretAlgorithm();
 
   auto start = std::chrono::high_resolution_clock::now();
   DTOPSolution solution = algorithm->Solve(instance);

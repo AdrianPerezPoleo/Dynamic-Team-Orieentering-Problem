@@ -20,6 +20,8 @@ class SolomonRegretAlgorithm : public DTOPAlgorithm {
 
  private:
   int SelectInitialNode(const std::vector<double>&, const std::vector<bool>&) const;
+  double CalculateInsertionCost(const Client&, const Client&, const Client&, double, double) const;
+  std::vector<int> GetNearestNeighbors(const std::vector<double>&, const std::vector<bool>&, int) const;
 };
 
 #endif

@@ -14,9 +14,12 @@
 
 #include "../dtop_algorithm.h"
 
-class SolomonAlgorithm : public DTOPAlgorithm {
+class SolomonRegretAlgorithm : public DTOPAlgorithm {
  public:
   DTOPSolution Solve(const DTOPInstance&) const override;
+
+ private:
+  int SelectInitialNode(const std::vector<double>&, const std::vector<bool>&) const;
 };
 
 #endif

@@ -9,9 +9,9 @@
  * 
  */
 
-#include "../include/dtop_parser.h"
+ #include "../include/dtop_parser.h"
 #include "../include/dtop_algorithm.h"
-#include "../include/dtop_solution.h"
+#include "../include/algorithm/solomon_regret_algorithm.h"
 
 #include <chrono>
 

@@ -26,7 +26,7 @@ struct DTOPSolutionData {
 class DTOPSolution {
  public:
   DTOPSolution(const DTOPSolutionData& data) : 
-    next_node_{std::move(data.next_node)}, prev_node_{std::move(data.prev_node)}, 
+     next_node_{std::move(data.next_node)}, prev_node_{std::move(data.prev_node)}, 
     route_profit_{std::move(route_profit_)}, route_duration_{std::move(data.route_duration)}, 
     visited_{std::move(data.visited)}, arrival_times_{std::move(data.arrival_times)} { }
 
@@ -41,6 +41,9 @@ class DTOPSolution {
  private:
   std::vector<int> next_node_;
   std::vector<int> prev_node_;
+
+  std::vector<int> first_node_;  // First node of each route
+  std::vector<int> last_node_;   // Last node of each route
 
   // double total_profit_;
   std::vector<double> route_profit_;

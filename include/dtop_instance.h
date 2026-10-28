@@ -38,11 +38,15 @@ class DTOPInstance {
   int GetNumberOfVehicles() const { return number_of_vehicles_; }
   double GetMaxTime() const { return max_time_; }
   std::vector<Client> GetClients() const { return clients_; }
+  std::vector<std::vector<double>> GetDistances() const { return distances_; };
  private:
   int number_of_nodes_;
   int number_of_vehicles_;
   double max_time_;
   std::vector<Client> clients_;
+  std::vector<std::vector<double>> distances_;
+
+  void InitializeDistances();
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DTOPInstance& instance) {

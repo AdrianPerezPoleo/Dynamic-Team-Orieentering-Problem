@@ -32,51 +32,75 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
   std::vector<int> next_node(instance.GetNumberOfNodes(), -1);
   std::vector<int> prev_node(instance.GetNumberOfNodes(), -1);
 
+  std::vector<double> route_profit(instance.GetNumberOfVehicles());
+
   std::vector<int> first_node(instance.GetNumberOfVehicles());  // First node of each route
   std::vector<int> last_node(instance.GetNumberOfVehicles());   // Last node of each route
 
+  std::vector<double> route_durations(instance.GetNumberOfVehicles());
+
   int q = 4;
+  int end_depot = instance.GetNumberOfNodes() - 1;
+
   // Para cada camión 
   for (int route{0}; route < instance.GetNumberOfVehicles(); ++route) {
     // Elegir cliente inicial de la ruta (por ejemplo el cliente más lejano del almacén)
     int current_reference_client = SelectInitialNode(instance.GetDistances()[0], visited);
+    if (current_reference_client == -1) break;
+
     first_node[route] = current_reference_client;
-    int route_accumulated_time = 0;
-    visited[0] = true;
+    last_node[route] = current_reference_client;
+    next_node[current_reference_client] = -1;
+    prev_node[current_reference_client] = -1;
+
+    double route_accumulated_time = instance.GetDistances()[0][current_reference_client] + instance.GetDistances()[current_reference_client][instance.GetNumberOfNodes() - 1];
+    route_profit[route] += instance.GetClients()[current_reference_client].reward;
+    visited[current_reference_client] = true;
+
     while (true) {
       // Para cada cliente que no tenga ruta asignada (En un futuro usar parametro q para no probar todos)
-      int selected_client{-1};
-      double best_client_value{-1};
       std::vector<int> nearest_neighbors = GetNearestNeighbors(instance.GetDistances()[current_reference_client], visited, q); 
-
-      int aux = first_node[route];
       std::vector<InsertionData> insertion_cost_data(q); 
+
+      int current = 0;
+
       // Para cada hueco de la ruta
-      while (aux != -1) {
+      while (current != end_depot) {
+        int succesor;
+        if (current == 0) {
+          succesor = first_node[route];
+        } else {
+          succesor = next_node[current] == -1 ? end_depot : next_node[current];
+        }
+
         // Para cada candidato
         for (int i{0}; i < nearest_neighbors.size(); ++i) {
-          const Client& succesor = next_node[aux] == -1 ? instance.GetClients()[0] : instance.GetClients()[next_node[aux]];
+          const Client& predecessor = instance.GetClients()[current];
+          const Client& successor = instance.GetClients()[succesor];
+          const Client& candidate = instance.GetClients()[nearest_neighbors[i]]; 
+          
           // Calcular el coste de inserción
           double insertion_cost = CalculateInsertionCost(
-            instance.GetClients()[aux], succesor, instance.GetClients()[nearest_neighbors[i]],
-            route_accumulated_time, instance.GetMaxTime());
+            predecessor, successor, candidate, route_accumulated_time, instance.GetMaxTime()
+          );
           // Almacenar el mejor y el segundo mejor coste de inserción
           if (insertion_cost < insertion_cost_data[i].best_insertion_cost) {
             insertion_cost_data[i].second_best_insertion_cost = insertion_cost_data[i].best_insertion_cost;
             insertion_cost_data[i].best_insertion_cost = insertion_cost;
-            insertion_cost_data[i].predecessor = aux;
+            insertion_cost_data[i].predecessor = current;
             insertion_cost_data[i].id = nearest_neighbors[i];
           } else if (insertion_cost < insertion_cost_data[i].second_best_insertion_cost) {
             insertion_cost_data[i].second_best_insertion_cost = insertion_cost;
             insertion_cost_data[i].id = nearest_neighbors[i];
           }
         }
-        aux = next_node[aux];      
+        current = succesor;      
       }
       // Calcular el arrepentimiento de cada candidato.
       double best_regret = -1;
-      double best_candidate = -1;
-      for (int i{0}; i < q; ++i) {
+      int best_candidate = -1;
+      for (int i{0}; i < nearest_neighbors.size(); ++i) {
+        if (insertion_cost_data[i].id == -1) continue;  
         double candidate_regret = insertion_cost_data[i].second_best_insertion_cost - insertion_cost_data[i].best_insertion_cost; 
         if (candidate_regret > best_regret) {
           best_regret = candidate_regret;
@@ -85,20 +109,39 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
       }
 
       if (best_candidate == -1) break;
+      int winner_id = insertion_cost_data[best_candidate].id;
+      int predecessor = insertion_cost_data[best_candidate].predecessor;
 
       // Añadir a la ruta el cliente que tenga el mayor arrepentimiento
-      next_node[insertion_cost_data[best_candidate].id] = next_node[insertion_cost_data[best_candidate].predecessor];
-      next_node[insertion_cost_data[best_candidate].predecessor] = insertion_cost_data[best_candidate].id;
+      if (predecessor == 0) {
+        next_node[winner_id] = first_node[route];
+        prev_node[winner_id] = -1;
+        prev_node[first_node[route]] = winner_id;
+        first_node[route] = winner_id;
+      } else {
+        next_node[winner_id] = next_node[predecessor];
+        prev_node[winner_id] = predecessor;
+        next_node[predecessor] = winner_id;
+
+        if (next_node[winner_id] != -1) {
+          prev_node[next_node[winner_id]] = winner_id;
+        } else {
+          last_node[route] = winner_id;
+        }        
+      }
+
       route_accumulated_time += insertion_cost_data[best_candidate].best_insertion_cost;
-      visited[insertion_cost_data[best_candidate].id] = true;
-      // Si no hay más clientes con inserción factible -> Parar la ruta actual y continuar con la siguiente.
-      current_reference_client = insertion_cost_data[best_candidate].id;
-      aux = current_reference_client;
+      visited[winner_id] = true;
+      current_reference_client = winner_id;
+
+      route_durations[route] = route_accumulated_time;
+      route_profit[route] += instance.GetClients()[winner_id].reward;
+    // Si no hay más clientes con inserción factible -> Parar la ruta actual y continuar con la siguiente.
     }
   }
 
   return DTOPSolution({
-    next_node, prev_node, {}, {}, visited, {}
+    next_node, prev_node, first_node, {}, route_profit, route_durations, visited, {}
   });
 }
 
@@ -112,7 +155,7 @@ int SolomonRegretAlgorithm::SelectInitialNode(const std::vector<double>& depot_d
   int max_distance_client = -1;
   double max_distance = depot_distances[0];
 
-  for (int client_id{2}; client_id < depot_distances.size(); ++client_id) {
+  for (int client_id{1}; client_id < depot_distances.size() - 1; ++client_id) {
     if (!visited[client_id] && depot_distances[client_id] > max_distance) {
       max_distance_client = client_id;
       max_distance = depot_distances[client_id];
@@ -132,7 +175,7 @@ int SolomonRegretAlgorithm::SelectInitialNode(const std::vector<double>& depot_d
 std::vector<int> SolomonRegretAlgorithm::GetNearestNeighbors(const std::vector<double>& distances, const std::vector<bool>& visited, int q) const {
   std::priority_queue<std::pair<double, int>> nearest_neighbors_queue;
 
-  for (int client_id{1}; client_id < distances.size(); ++client_id) {
+  for (int client_id{1}; client_id < distances.size() - 1; ++client_id) {
     if (!visited[client_id]) {
       nearest_neighbors_queue.push({distances[client_id], client_id});
       if (nearest_neighbors_queue.size() > q) nearest_neighbors_queue.pop();

@@ -10,5 +10,6 @@ add_executable(
     src/main.cc
     src/dtop_instance.cc
     src/dtop_parser.cc
+    src/dtop_solution_renderer.cc
     src/algorithm/solomon_regret_algorithm.cc
 )

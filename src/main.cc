@@ -9,9 +9,10 @@
  * 
  */
 
- #include "../include/dtop_parser.h"
+#include "../include/dtop_parser.h"
 #include "../include/dtop_algorithm.h"
 #include "../include/algorithm/solomon_regret_algorithm.h"
+#include "../include/dtop_solution_renderer.h"
 
 #include <chrono>
 
@@ -23,6 +24,8 @@ int main(int argc, char* argv[]) {
 
   std::string file_name = argv[1];
   DTOPInstance instance = DTOPParser::Parse(file_name);
+  std::cout << instance << std::endl;
+
   DTOPAlgorithm* algorithm = new SolomonRegretAlgorithm();
 
   auto start = std::chrono::high_resolution_clock::now();
@@ -30,8 +33,9 @@ int main(int argc, char* argv[]) {
   auto end = std::chrono::high_resolution_clock::now();
 
   std::chrono::duration<double, std::milli> duration = end - start;
-  std::cout << instance << std::endl;
   std::cout << "Tiempo de ejecucion: " << duration.count() << " ms" << std::endl;
 
+  SolutionRenderer::ExportToGraphviz(solution, instance);
+  SolutionRenderer::PrintConsoleSummary(solution, instance);
   return 0;
 }

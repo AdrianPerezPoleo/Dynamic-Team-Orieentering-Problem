@@ -15,12 +15,10 @@
 void DTOPInstance::InitializeDistances() {
   for (const Client& client_1 : clients_) {
     for (const Client& client_2 : clients_) {
-      if (client_1.id != client_2.id) {
-        distances_[client_1.id][client_2.id] = std::hypot(
-          client_1.x_coordinate - client_2.x_coordinate,
-          client_1.y_coordinate - client_2.y_coordinate
-        );
-      }
-    }
+      distances_[client_1.id][client_2.id] = std::hypot(
+        client_1.x_coordinate - client_2.x_coordinate,
+        client_1.y_coordinate - client_2.y_coordinate
+      );
+    }  
   }
 }

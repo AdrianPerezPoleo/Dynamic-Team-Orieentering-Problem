@@ -32,13 +32,14 @@ struct Client {
 class DTOPInstance {
  public:
   DTOPInstance(int nodes, int vehicles, double max_time, const std::vector<Client>& clients) :
-    number_of_nodes_{nodes}, number_of_vehicles_{vehicles}, max_time_{max_time}, clients_{clients} { }
+    number_of_nodes_{nodes}, number_of_vehicles_{vehicles}, max_time_{max_time}, clients_{clients},
+    distances_{std::vector<std::vector<double>>(nodes, std::vector<double>(nodes, 0.0))} { InitializeDistances(); }
 
   int GetNumberOfNodes() const { return number_of_nodes_; }
   int GetNumberOfVehicles() const { return number_of_vehicles_; }
   double GetMaxTime() const { return max_time_; }
-  std::vector<Client> GetClients() const { return clients_; }
-  std::vector<std::vector<double>> GetDistances() const { return distances_; };
+  const std::vector<Client>& GetClients() const { return clients_; }
+  const std::vector<std::vector<double>>& GetDistances() const { return distances_; };
  private:
   int number_of_nodes_;
   int number_of_vehicles_;

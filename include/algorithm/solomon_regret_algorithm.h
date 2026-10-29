@@ -13,15 +13,27 @@
 #define SOLOMON_ALGORITHM_H
 
 #include "../dtop_algorithm.h"
+#include "../dtop_solution_builder.h"
+
+struct InsertionData {
+  int id = -1;
+  double best_insertion_cost = 1e6;
+  double second_best_insertion_cost = 1e6;
+  int predecessor;
+};
 
 class SolomonRegretAlgorithm : public DTOPAlgorithm {
  public:
   DTOPSolution Solve(const DTOPInstance&) const override;
 
  private:
-  int SelectInitialNode(const std::vector<double>&, const std::vector<bool>&) const;
-  double CalculateInsertionCost(const Client&, const Client&, const Client&, double, double) const;
-  std::vector<int> GetNearestNeighbors(const std::vector<double>&, const std::vector<bool>&, int) const;
+  int SelectInitialNode(const std::vector<double>&, const DTOPSolutionBuilder&) const;
+  double CalculateInsertionCost(int, int, int, const std::vector<std::vector<double>>&, double, double) const;
+  std::vector<int> GetNearestNeighbors(const std::vector<double>&, const DTOPSolutionBuilder&, int) const;
+  void EvaluateInsertions(int route, const std::vector<int>& candidates, 
+                          const DTOPSolutionBuilder& solution, const DTOPInstance& instance, 
+                          std::vector<InsertionData>& insertion_data) const;
+  int SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data) const;
 };
 
 #endif

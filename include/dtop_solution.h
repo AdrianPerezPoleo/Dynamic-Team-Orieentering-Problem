@@ -57,7 +57,6 @@ class DTOPSolution {
   std::vector<int> first_node_;  // First node of each route
   std::vector<int> last_node_;   // Last node of each route
 
-  // double total_profit_;
   std::vector<double> route_profit_;
   std::vector<double> route_duration_;
   std::vector<bool> visited_;

@@ -21,7 +21,6 @@ class RouteMovement {
   virtual ~RouteMovement() = default;
 
   virtual void Execute(DTOPSolution& solution) const = 0;
-  virtual double CalculateDelta(DTOPSolution& solution) const = 0;
 };
 
 #endif

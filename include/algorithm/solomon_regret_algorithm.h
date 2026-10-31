@@ -38,7 +38,7 @@ class SolomonRegretAlgorithm : public DTOPAlgorithm {
   void EvaluateInsertions(int route, const std::vector<int>& candidates, 
                           const DTOPSolutionBuilder& solution, const DTOPInstance& instance, 
                           std::vector<InsertionData>& insertion_data) const;
-  int SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data) const;
+  int SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data, int) const;
 };
 
 #endif

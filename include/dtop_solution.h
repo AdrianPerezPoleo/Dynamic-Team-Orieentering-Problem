@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#include "local_search/route_movement.h"
+
 struct DTOPSolutionData {
     std::vector<int> next_node;
     std::vector<int> prev_node;
@@ -30,25 +32,25 @@ struct DTOPSolutionData {
 
 class DTOPSolution {
  public:
-  DTOPSolution(const DTOPSolutionData& data) : 
+  DTOPSolution(DTOPSolutionData data) : 
     next_node_{std::move(data.next_node)}, prev_node_{std::move(data.prev_node)},
     first_node_{std::move(data.first_node)}, last_node_{std::move(data.last_node)},
     route_profit_{std::move(data.route_profit)}, route_duration_{std::move(data.route_duration)}, 
     visited_{std::move(data.visited)}, arrival_times_{std::move(data.arrival_times)} { }
 
-  double GetTotalProfit() const {
-    double total_profit{0.0};
-    for (const auto& route : route_profit_) {
-      total_profit += route;
-    }
-    return total_profit;
-  }
+  double GetTotalProfit() const;
+  void Execute(const RouteMovement& movement) { movement.Execute(*this); }
   
   const std::vector<int>& GetFirstNodes() const { return first_node_; }
   const std::vector<int>& GetNextNodes() const { return next_node_; }
   const std::vector<double>& GetRouteProfits() const { return route_profit_; }
   const std::vector<double>& GetRouteDurations() const { return route_duration_; }
   const std::vector<bool>& GetVisited() const { return visited_; }
+
+  void InsertClient(int route, int candidate, int predecessor, double cost, double reward);
+  void RemoveClient(int route, int client, double time_saved, double reward_lost);
+  double CalculateInsertionCost(int predecessor, int successor, int candidate, const std::vector<std::vector<double>>& distances) const;
+  double CalculateRemovalCost(int predecessor, int client, int successor, const std::vector<std::vector<double>>& distances) const;
 
  private:
   std::vector<int> next_node_;
@@ -62,6 +64,5 @@ class DTOPSolution {
   std::vector<bool> visited_;
   std::vector<std::vector<double>> arrival_times_;
 };
-
 
 #endif

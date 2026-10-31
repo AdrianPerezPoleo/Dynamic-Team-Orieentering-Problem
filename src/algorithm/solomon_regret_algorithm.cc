@@ -26,13 +26,14 @@
 DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
   DTOPSolutionBuilder solution(instance);
   int q = 4;
-  int k = 4;
+  int k_initial = 4;
+  int k_regret = 4;
   int end_depot = instance.GetNumberOfNodes() - 1;
 
   // Para cada camión 
   for (int route{0}; route < instance.GetNumberOfVehicles(); ++route) {
     // Elegir cliente inicial de la ruta (por ejemplo el cliente más lejano del almacén)
-    int seed_id = SelectInitialNode(instance.GetDistances()[0], solution, k);
+    int seed_id = SelectInitialNode(instance.GetDistances()[0], solution, k_initial);
     if (seed_id == -1) break;
       
     double initial_time = instance.GetDistances()[0][seed_id] + instance.GetDistances()[seed_id][end_depot];
@@ -49,7 +50,7 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
       EvaluateInsertions(route, nearest_neighbors, solution, instance, insertion_cost_data);
 
       // Calcular el arrepentimiento de cada candidato.
-      int best_candidate = SelectBestCandidateByRegret(insertion_cost_data);
+      int best_candidate = SelectBestCandidateByRegret(insertion_cost_data, k_regret);
       if (best_candidate == -1) break;
 
       int winner_id = insertion_cost_data[best_candidate].id;
@@ -132,7 +133,7 @@ double SolomonRegretAlgorithm::CalculateInsertionCost(int predecessor, int succe
   double distance_from_candidate = distances[candidate][successor];
   double insertion_cost = distance_to_candidate + distance_from_candidate - removed_distance;
   if (accumulated_time + insertion_cost < max_time) return insertion_cost;
-  return 1e6;  // Devolver algo que descalifique automáticamente al nodo
+  return 1e6;
 }
 
 /**
@@ -187,16 +188,21 @@ void SolomonRegretAlgorithm::EvaluateInsertions(int route, const std::vector<int
  * @param insertion_data A vector containing the evaluated insertion costs for all considered candidates.
  * @return int The index (within the insertion_data vector) of the winning candidate, or -1 if no candidates are feasible.
  */
-int SolomonRegretAlgorithm::SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data) const {
-  double best_regret = -1;
-  int best_candidate = -1;
+int SolomonRegretAlgorithm::SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data, int k) const {
+  std::vector<std::pair<double, int>> valid_candidates;
   for (int i{0}; i < insertion_data.size(); ++i) {
     if (insertion_data[i].id == -1) continue;  
-    double candidate_regret = insertion_data[i].second_best_insertion_cost - insertion_data[i].best_insertion_cost; 
-    if (candidate_regret > best_regret) {
-      best_regret = candidate_regret;
-      best_candidate = i;
-    }
+    double regret = insertion_data[i].second_best_insertion_cost - insertion_data[i].best_insertion_cost; 
+    valid_candidates.emplace_back(regret, i);
   }
-  return best_candidate;
+
+  if (valid_candidates.empty()) return -1;
+  std::sort(valid_candidates.begin(), valid_candidates.end(), 
+            [](const auto& a, const auto& b) {
+              return a.first > b.first;
+            });
+
+  int rcl_size = std::min(k, static_cast<int>(valid_candidates.size()));
+  int random_index = generator_.GetInt(0, rcl_size - 1);
+  return valid_candidates[random_index].second;
 }

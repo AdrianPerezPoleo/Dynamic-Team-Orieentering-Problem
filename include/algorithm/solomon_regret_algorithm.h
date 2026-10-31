@@ -14,6 +14,7 @@
 
 #include "../dtop_algorithm.h"
 #include "../dtop_solution_builder.h"
+#include "../random_generator.h"
 
 struct InsertionData {
   int id = -1;
@@ -24,10 +25,14 @@ struct InsertionData {
 
 class SolomonRegretAlgorithm : public DTOPAlgorithm {
  public:
-  DTOPSolution Solve(const DTOPInstance&) const override;
+  SolomonRegretAlgorithm() = default;
+  SolomonRegretAlgorithm(unsigned int seed) : generator_(seed) {}
 
+  DTOPSolution Solve(const DTOPInstance&) const override;
  private:
-  int SelectInitialNode(const std::vector<double>&, const DTOPSolutionBuilder&) const;
+  mutable RandomGenerator generator_;
+
+  int SelectInitialNode(const std::vector<double>&, const DTOPSolutionBuilder&, int, int seed = 0) const;
   double CalculateInsertionCost(int, int, int, const std::vector<std::vector<double>>&, double, double) const;
   std::vector<int> GetNearestNeighbors(const std::vector<double>&, const DTOPSolutionBuilder&, int) const;
   void EvaluateInsertions(int route, const std::vector<int>& candidates, 

@@ -11,6 +11,7 @@
 
 #include "../../include/algorithm/solomon_regret_algorithm.h"
 #include "../../include/dtop_solution_builder.h"
+#include "../../include/random_generator.h"
 
 #include <algorithm>
 #include <cmath>
@@ -25,12 +26,13 @@
 DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
   DTOPSolutionBuilder solution(instance);
   int q = 4;
+  int k = 4;
   int end_depot = instance.GetNumberOfNodes() - 1;
 
   // Para cada camión 
   for (int route{0}; route < instance.GetNumberOfVehicles(); ++route) {
     // Elegir cliente inicial de la ruta (por ejemplo el cliente más lejano del almacén)
-    int seed_id = SelectInitialNode(instance.GetDistances()[0], solution);
+    int seed_id = SelectInitialNode(instance.GetDistances()[0], solution, k);
     if (seed_id == -1) break;
       
     double initial_time = instance.GetDistances()[0][seed_id] + instance.GetDistances()[seed_id][end_depot];
@@ -68,18 +70,22 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
  * @param depot_distances Distances of all clients to the depot.
  * @return int Id of thefurthest client.
  */
-int SolomonRegretAlgorithm::SelectInitialNode(const std::vector<double>& depot_distances, const DTOPSolutionBuilder& solution) const {
-  int max_distance_client = -1;
-  double max_distance = -1.0;
-
-  for (int client_id{1}; client_id < depot_distances.size() - 1; ++client_id) {
-    if (!solution.IsVisited(client_id) && depot_distances[client_id] > max_distance) {
-      max_distance_client = client_id;
-      max_distance = depot_distances[client_id];
+int SolomonRegretAlgorithm::SelectInitialNode(const std::vector<double>& depot_distances, const DTOPSolutionBuilder& solution, int k, int seed) const {
+  std::vector<std::pair<double, int>> distances;
+  for (int i{1}; i < depot_distances.size() - 1; ++i) {
+    if (!solution.IsVisited(i)) {
+      distances.emplace_back(depot_distances[i], i);
     }
   }
+  std::sort(distances.begin(), distances.end());
 
-  return max_distance_client;
+  std::vector<std::pair<double, int>> candidates_list;
+  for (int client_id{1}; client_id < distances.size() - 1; ++client_id) {
+    candidates_list.emplace_back(distances[client_id]);
+    if (candidates_list.size() == k) break;
+  }
+
+  return candidates_list[generator_.GetInt(0, candidates_list.size() - 1)].second;
 }
 
 /**

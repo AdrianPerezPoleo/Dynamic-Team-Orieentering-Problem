@@ -17,23 +17,25 @@
 
 class RelocateMovement : public RouteMovement {
  public:
-  RelocateMovement(int old_route, int new_route, int client_id, int new_predecessor,
-        double removal_time_saved, double insertion_time_cost, double reward) : 
-    old_route_{old_route}, new_route_{new_route}, client_id_{client_id}, new_predecessor_{new_predecessor},
-    removal_time_saved_{removal_time_saved}, insertion_time_cost_{insertion_time_cost}, reward_{reward} { }
+  struct RelocateData {
+    int old_route;
+    int new_route;
+    int client_id;
+    int new_predecessor;
+    double removal_time_saved;
+    double insertion_time_cost;
+    double reward;
+  };
+
+  RelocateMovement(const RelocateData& data) : data_{data} { }
 
   void Execute(DTOPSolution& solution) const override {
-    solution.RemoveClient(old_route_, client_id_, removal_time_saved_, reward_);
-    solution.InsertClient(new_route_, client_id_, new_predecessor_, insertion_time_cost_, reward_);
+    solution.RemoveClient(data_.old_route, data_.client_id, data_.removal_time_saved, data_.reward);
+    solution.InsertClient(data_.new_route, data_.client_id, data_.new_predecessor, data_.insertion_time_cost, data_.reward);
   }
+
  private:
-  int old_route_;  // Intra-route Relocate when old_route_ = new_route_
-  int new_route_;
-  int client_id_;
-  int new_predecessor_;
-  double removal_time_saved_;
-  double insertion_time_cost_;
-  double reward_;
+  RelocateData data_;
 };
 
 #endif

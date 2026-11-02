@@ -121,3 +121,45 @@ double DTOPSolution::CalculateRemovalCost(int predecessor, int client, int succe
   double insertion_cost = new_distance - (distance_from_removed + distance_to_removed);
   return std::abs(insertion_cost);
 }
+
+/**
+ * @brief 
+ * 
+ * @param route 
+ * @param first_client 
+ * @param last_client 
+ * @param delta_time 
+ */
+void DTOPSolution::ApplyTwoOpt(int route, int first_client, int last_client, double delta_time) {
+  int before_first = prev_node_[first_client];
+  int after_last = next_node_[last_client];
+
+  int current = first_client;
+  bool reached_end = false;
+  
+  while (!reached_end) {
+    if (current == last_client) reached_end = true;
+    
+    int aux = prev_node_[current];
+    prev_node_[current] = next_node_[current];
+    next_node_[current] = aux;
+
+    if (!reached_end) current = prev_node_[current];
+  }
+
+  if (before_first == -1) {  // The first node is the first of the route.
+    first_node_[route] = last_client;
+  } else {
+    next_node_[before_first] = last_client;
+  }
+  prev_node_[last_client] = before_first;
+
+  if (after_last == -1) {  // The last node was the last of the route.
+    last_node_[route] = first_client;
+  } else {
+    prev_node_[after_last] = first_client;
+  }
+  next_node_[first_client] = after_last;
+
+  route_duration_[route] += delta_time;
+}

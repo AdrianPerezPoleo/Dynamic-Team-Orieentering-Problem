@@ -49,6 +49,7 @@ class DTOPSolution {
 
   void InsertClient(int route, int candidate, int predecessor, double cost, double reward);
   void RemoveClient(int route, int client, double time_saved, double reward_lost);
+  void ApplyTwoOpt(int route, int first_client, int last_client, double delta_time);
   double CalculateInsertionCost(int predecessor, int successor, int candidate, const std::vector<std::vector<double>>& distances) const;
   double CalculateRemovalCost(int predecessor, int client, int successor, const std::vector<std::vector<double>>& distances) const;
 

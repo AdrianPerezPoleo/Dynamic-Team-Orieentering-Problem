@@ -32,7 +32,8 @@ class SolomonRegretAlgorithm : public DTOPAlgorithm {
  private:
   mutable RandomGenerator generator_;
 
-  int SelectInitialNode(const std::vector<double>&, const DTOPSolutionBuilder&, int, int seed = 0) const;
+  int SelectInitialNode(const std::vector<double>& initial_depot_distances, const std::vector<double>& end_depot_distances, 
+        const DTOPSolutionBuilder& solution, double max_time, int k) const;
   double CalculateInsertionCost(int, int, int, const std::vector<std::vector<double>>&, double, double) const;
   std::vector<int> GetNearestNeighbors(const std::vector<double>&, const DTOPSolutionBuilder&, int) const;
   void EvaluateInsertions(int route, const std::vector<int>& candidates, 

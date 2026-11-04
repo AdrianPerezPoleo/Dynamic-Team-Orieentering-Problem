@@ -32,6 +32,7 @@ struct DTOPSolutionData {
 
 class DTOPSolution {
  public:
+  DTOPSolution() = default;
   DTOPSolution(DTOPSolutionData data) : 
     next_node_{std::move(data.next_node)}, prev_node_{std::move(data.prev_node)},
     first_node_{std::move(data.first_node)}, last_node_{std::move(data.last_node)},
@@ -52,6 +53,8 @@ class DTOPSolution {
   void ApplyTwoOpt(int route, int first_client, int last_client, double delta_time);
   double CalculateInsertionCost(int predecessor, int successor, int candidate, const std::vector<std::vector<double>>& distances) const;
   double CalculateRemovalCost(int predecessor, int client, int successor, const std::vector<std::vector<double>>& distances) const;
+
+  DTOPSolution& operator=(const DTOPSolution&) = default;
 
  private:
   std::vector<int> next_node_;

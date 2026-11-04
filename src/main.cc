@@ -12,6 +12,7 @@
 #include "../include/dtop_parser.h"
 #include "../include/dtop_algorithm.h"
 #include "../include/algorithm/solomon_regret_algorithm.h"
+#include "../include/local_search/gvns_algorithm.h"
 #include "../include/dtop_solution_renderer.h"
 
 #include <chrono>
@@ -26,10 +27,11 @@ int main(int argc, char* argv[]) {
   DTOPInstance instance = DTOPParser::Parse(file_name);
   std::cout << instance << std::endl;
 
-  DTOPAlgorithm* algorithm = new SolomonRegretAlgorithm();
+  DTOPAlgorithm* constructive_algorithm = new SolomonRegretAlgorithm();
+  DTOPAlgorithm* gvns_algorithm = new GVNSAlgorithm(*constructive_algorithm);
 
   auto start = std::chrono::high_resolution_clock::now();
-  DTOPSolution solution = algorithm->Solve(instance);
+  DTOPSolution solution = gvns_algorithm->Solve(instance);
   auto end = std::chrono::high_resolution_clock::now();
 
   std::chrono::duration<double, std::milli> duration = end - start;

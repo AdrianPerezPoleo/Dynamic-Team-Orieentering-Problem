@@ -14,7 +14,6 @@
 #include "../../include/random_generator.h"
 
 #include <algorithm>
-#include <cmath>
 #include <queue>
 
 /**
@@ -33,13 +32,13 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
   // Para cada camión 
   for (int route{0}; route < instance.GetNumberOfVehicles(); ++route) {
     // Elegir cliente inicial de la ruta (por ejemplo el cliente más lejano del almacén)
-    int seed_id = SelectInitialNode(instance.GetDistances()[0], solution, k_initial);
-    if (seed_id == -1) break;
+    int initial_id = SelectInitialNode(instance.GetDistances()[0], instance.GetDistances()[end_depot], solution, instance.GetMaxTime(), k_initial);
+    if (initial_id == -1) continue;
       
-    double initial_time = instance.GetDistances()[0][seed_id] + instance.GetDistances()[seed_id][end_depot];
-    int current_reference_client = seed_id;
+    double initial_time = instance.GetDistances()[0][initial_id] + instance.GetDistances()[initial_id][end_depot];
+    int current_reference_client = initial_id;
 
-    solution.InitializeRouteWithSeed(route, seed_id, initial_time, instance.GetClients().at(seed_id).reward);
+    solution.InitializeRouteWithSeed(route, initial_id, initial_time, instance.GetClients().at(initial_id).reward);
 
     while (true) {
       // Para cada cliente que no tenga ruta asignada
@@ -71,21 +70,25 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
  * @param depot_distances Distances of all clients to the depot.
  * @return int Id of thefurthest client.
  */
-int SolomonRegretAlgorithm::SelectInitialNode(const std::vector<double>& depot_distances, const DTOPSolutionBuilder& solution, int k, int seed) const {
+int SolomonRegretAlgorithm::SelectInitialNode(const std::vector<double>& initial_depot_distances, 
+      const std::vector<double>& end_depot_distances, const DTOPSolutionBuilder& solution, double max_time, int k) const {
   std::vector<std::pair<double, int>> distances;
-  for (int i{1}; i < depot_distances.size() - 1; ++i) {
+  for (int i{1}; i < initial_depot_distances.size() - 1; ++i) {
     if (!solution.IsVisited(i)) {
-      distances.emplace_back(depot_distances[i], i);
+      distances.emplace_back(initial_depot_distances[i], i);
     }
   }
-  std::sort(distances.begin(), distances.end());
+  std::sort(distances.begin(), distances.end(), std::greater<>());
 
   std::vector<std::pair<double, int>> candidates_list;
-  for (int client_id{1}; client_id < distances.size() - 1; ++client_id) {
-    candidates_list.emplace_back(distances[client_id]);
+  for (int i{0}; i < distances.size(); ++i) {
+    int current_client = distances[i].second;
+    if (initial_depot_distances[current_client] + end_depot_distances[current_client] > max_time) continue;
+    candidates_list.emplace_back(distances[i]);
     if (candidates_list.size() == k) break;
   }
 
+  if (candidates_list.empty()) return -1;
   return candidates_list[generator_.GetInt(0, candidates_list.size() - 1)].second;
 }
 

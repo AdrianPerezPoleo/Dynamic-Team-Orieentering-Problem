@@ -14,4 +14,5 @@ add_executable(
     src/dtop_solution_builder.cc
     src/dtop_solution.cc
     src/algorithm/solomon_regret_algorithm.cc
+    src/local_search/gvns_algorithm.cc
 )

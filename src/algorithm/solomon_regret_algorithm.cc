@@ -49,7 +49,7 @@ DTOPSolution SolomonRegretAlgorithm::Solve(const DTOPInstance& instance) const {
       EvaluateInsertions(route, nearest_neighbors, solution, instance, insertion_cost_data);
 
       // Calcular el arrepentimiento de cada candidato.
-      int best_candidate = SelectBestCandidateByRegret(insertion_cost_data, k_regret);
+      int best_candidate = SelectBestCandidateByRegret(insertion_cost_data, instance.GetRewards(), k_regret);
       if (best_candidate == -1) break;
 
       int winner_id = insertion_cost_data[best_candidate].id;
@@ -191,11 +191,11 @@ void SolomonRegretAlgorithm::EvaluateInsertions(int route, const std::vector<int
  * @param insertion_data A vector containing the evaluated insertion costs for all considered candidates.
  * @return int The index (within the insertion_data vector) of the winning candidate, or -1 if no candidates are feasible.
  */
-int SolomonRegretAlgorithm::SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data, int k) const {
+int SolomonRegretAlgorithm::SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data, const std::vector<int>& rewards, int k) const {
   std::vector<std::pair<double, int>> valid_candidates;
   for (int i{0}; i < insertion_data.size(); ++i) {
-    if (insertion_data[i].id == -1) continue;  
-    double regret = insertion_data[i].second_best_insertion_cost - insertion_data[i].best_insertion_cost; 
+    if (insertion_data[i].id == -1) continue;
+    double regret = rewards[insertion_data[i].id] / (insertion_data[i].second_best_insertion_cost - insertion_data[i].best_insertion_cost); 
     valid_candidates.emplace_back(regret, i);
   }
 

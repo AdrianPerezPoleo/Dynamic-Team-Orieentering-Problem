@@ -21,6 +21,7 @@ struct InsertionData {
   double best_insertion_cost = 1e6;
   double second_best_insertion_cost = 1e6;
   int predecessor;
+  int reward;
 };
 
 class SolomonRegretAlgorithm : public DTOPAlgorithm {
@@ -39,7 +40,7 @@ class SolomonRegretAlgorithm : public DTOPAlgorithm {
   void EvaluateInsertions(int route, const std::vector<int>& candidates, 
                           const DTOPSolutionBuilder& solution, const DTOPInstance& instance, 
                           std::vector<InsertionData>& insertion_data) const;
-  int SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data, int) const;
+  int SelectBestCandidateByRegret(const std::vector<InsertionData>& insertion_data, const std::vector<int>& rewards, int k) const;
 };
 
 #endif

@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   std::cout << instance << std::endl;
 
   DTOPAlgorithm* constructive_algorithm = new SolomonRegretAlgorithm();
-  DTOPAlgorithm* gvns_algorithm = new GVNSAlgorithm(*constructive_algorithm);
+  DTOPAlgorithm* gvns_algorithm = new GVNSAlgorithm(* constructive_algorithm);
 
   auto start = std::chrono::high_resolution_clock::now();
   DTOPSolution solution = gvns_algorithm->Solve(instance);

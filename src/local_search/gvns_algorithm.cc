@@ -18,7 +18,7 @@
  * @return DTOPSolution 
  */
 DTOPSolution GVNSAlgorithm::Solve(const DTOPInstance& instance) const {
-  int k = 100;
+  int k = 200;
   DTOPSolution best_solution;
 
   for (int i{0}; i < k; ++i) {

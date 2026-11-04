@@ -20,7 +20,7 @@ struct Client {
   int id;
   double x_coordinate;
   double y_coordinate;
-  double reward;
+  int reward;
   double arrival_time;
 
   bool operator<(const Client& other) const {
@@ -33,13 +33,15 @@ class DTOPInstance {
  public:
   DTOPInstance(int nodes, int vehicles, double max_time, const std::vector<Client>& clients) :
     number_of_nodes_{nodes}, number_of_vehicles_{vehicles}, max_time_{max_time}, clients_{clients},
-    distances_{std::vector<std::vector<double>>(nodes, std::vector<double>(nodes, 0.0))} { InitializeDistances(); }
+    distances_{std::vector<std::vector<double>>(nodes, std::vector<double>(nodes, 0.0))} { InitializeDistances(); InitializeRewards(); }
 
   int GetNumberOfNodes() const { return number_of_nodes_; }
   int GetNumberOfVehicles() const { return number_of_vehicles_; }
   double GetMaxTime() const { return max_time_; }
   const std::vector<Client>& GetClients() const { return clients_; }
+  const std::vector<int> GetRewards() const { return rewards_; }
   const std::vector<std::vector<double>>& GetDistances() const { return distances_; };
+
  private:
   int number_of_nodes_;
   int number_of_vehicles_;
@@ -47,7 +49,10 @@ class DTOPInstance {
   std::vector<Client> clients_;
   std::vector<std::vector<double>> distances_;
 
+  std::vector<int> rewards_;
+
   void InitializeDistances();
+  void InitializeRewards(); 
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DTOPInstance& instance) {

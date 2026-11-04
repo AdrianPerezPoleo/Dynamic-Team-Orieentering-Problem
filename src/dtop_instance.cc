@@ -22,3 +22,9 @@ void DTOPInstance::InitializeDistances() {
     }  
   }
 }
+
+void DTOPInstance::InitializeRewards() {
+  for (const Client& client : clients_) {
+    rewards_.emplace_back(client.reward);
+  }
+}
